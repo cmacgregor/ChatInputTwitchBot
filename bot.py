@@ -6,11 +6,30 @@ import vgamepad as vg
 
 from fetchtoken import fetch_oath_access_token
 
+xbox360_button_mapping = {
+    'UP': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
+    'DOWN': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
+    'LEFT': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
+    'RIGHT': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
+    'START': vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
+    'BACK': vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
+    'L3': vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_THUMB,
+    'R3': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_THUMB,
+    'LB': vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_SHOULDER,
+    'RB': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
+    #'HOME': vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
+    'A': vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
+    'B': vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
+    'X': vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
+    'Y': vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
+}
+
 class Bot(commands.Bot):
-    def __init__(self, access_token):
+    def __init__(self, gamepad, input_map):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
-        super().__init__(token=access_token, prefix=os.getenv('?'), initial_channels=[os.getenv('CHANNEL')])
-        self.virtualgamepad = vg.VX360Gamepad()
+        super().__init__(token=os.getenv('ACCESS_TOKEN'), prefix=os.getenv('PREFIX'), initial_channels=[os.getenv('CHANNEL')])
+        self.virtualgamepad = gamepad
+        self.input_mapping = input_map
 
     async def event_ready(self):
         # Notify us when everything is ready!
@@ -23,24 +42,23 @@ class Bot(commands.Bot):
         if message.echo:
             return
 
-        if message.content == 'A':
-            self.virtualgamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-            self.virtualgamepad.update()
-            time.sleep(0.5)
-            self.virtualgamepad.release_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-            self.virtualgamepad.update()
-
-        print(message.content)
+        if message.content.upper() in self.input_mapping.keys() :
+            print(f'{message.author.display_name}: {message.content}')
+            self.input_button(self.input_mapping[message.content.upper()])
 
         await self.handle_commands(message)
 
+    def input_button(self, pressedButton) -> None:
+        self.virtualgamepad.press_button(button=pressedButton)
+        self.virtualgamepad.update()
+        time.sleep(0.5)
+        self.virtualgamepad.release_button(pressedButton)
+        self.virtualgamepad.update()
+        
     @commands.command()
     async def hello(self, ctx: commands.Context):
         await ctx.send(f'Hello {ctx.author.name}!')
 
 load_dotenv()
-
-access_token = fetch_oath_access_token(os.getenv('CLIENT_ID'), os.getenv('CLIENT_SECRET'))
-
-bot = Bot(access_token)
+bot = Bot(vg.VX360Gamepad(), xbox360_button_mapping)
 bot.run()
