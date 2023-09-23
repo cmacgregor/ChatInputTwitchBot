@@ -9,3 +9,6 @@ https://twitchio.dev/en/stable/quickstart.html
 
 vgamepad github:
 https://github.com/yannbouteiller/vgamepad
+
+twitch documentation on Client credentials grant flow:
+https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow

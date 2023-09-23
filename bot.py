@@ -4,10 +4,12 @@ import time
 from twitchio.ext import commands
 import vgamepad as vg
 
+from fetchtoken import fetch_oath_access_token
+
 class Bot(commands.Bot):
-    def __init__(self):
+    def __init__(self, access_token):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
-        super().__init__(token=os.getenv('ACCESS_TOKEN'), prefix=os.getenv('?'), initial_channels=[prefix=os.getenv('CHANNEL')])
+        super().__init__(token=access_token, prefix=os.getenv('?'), initial_channels=[os.getenv('CHANNEL')])
         self.virtualgamepad = vg.VX360Gamepad()
 
     async def event_ready(self):
@@ -37,5 +39,8 @@ class Bot(commands.Bot):
         await ctx.send(f'Hello {ctx.author.name}!')
 
 load_dotenv()
-bot = Bot()
+
+access_token = fetch_oath_access_token(os.getenv('CLIENT_ID'), os.getenv('CLIENT_SECRET'))
+
+bot = Bot(access_token)
 bot.run()
