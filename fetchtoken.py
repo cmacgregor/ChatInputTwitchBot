@@ -1,5 +1,6 @@
 import requests
 
+#this should be made async
 def fetch_oath_access_token(client_id:str, client_secret:str) -> str:
     endpoint = 'https://id.twitch.tv/oauth2/token'
 
