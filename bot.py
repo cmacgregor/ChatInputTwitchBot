@@ -4,7 +4,6 @@ import time
 from twitchio.ext import commands
 import vgamepad as vg
 
-
 class Bot(commands.Bot):
     def __init__(self):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
