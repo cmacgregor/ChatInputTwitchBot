@@ -7,6 +7,10 @@ import vgamepad as vg
 from fetchtoken import fetch_oath_access_token
 
 xbox360_button_mapping = {
+    'A': vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
+    'B': vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
+    'X': vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
+    'Y': vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
     'UP': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
     'DOWN': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
     'LEFT': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
@@ -17,11 +21,10 @@ xbox360_button_mapping = {
     'R3': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_THUMB,
     'LB': vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_SHOULDER,
     'RB': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
+    'LT': 255,
+    'RT': 255,
     #'HOME': vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
-    'A': vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
-    'B': vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
-    'X': vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
-    'Y': vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
+
 }
 
 class Bot(commands.Bot):
@@ -44,15 +47,32 @@ class Bot(commands.Bot):
 
         if message.content.upper() in self.input_mapping.keys() :
             print(f'{message.author.display_name}: {message.content}')
-            self.input_button(self.input_mapping[message.content.upper()])
+            button_name = message.content.upper()
+            if button_name == 'LT' or button_name == 'RT':
+                self.input_trigger(button_name)
+            else:
+                self.input_button(button_name)
 
         await self.handle_commands(message)
 
-    def input_button(self, pressedButton) -> None:
-        self.virtualgamepad.press_button(button=pressedButton)
+    def input_trigger(self, button_name) -> None:
+        if button_name == 'RT':
+            self.virtualgamepad.right_trigger(value=255)     
+        else:
+            self.virtualgamepad.left_trigger(value=255)
         self.virtualgamepad.update()
         time.sleep(0.5)
-        self.virtualgamepad.release_button(pressedButton)
+        if button_name == 'RT':
+            self.virtualgamepad.right_trigger(0)
+        else:
+            self.virtualgamepad.left_trigger(0)
+        self.virtualgamepad.update()
+
+    def input_button(self, button_name) -> None:
+        self.virtualgamepad.press_button(button=self.input_mapping[button_name])
+        self.virtualgamepad.update()
+        time.sleep(0.5)
+        self.virtualgamepad.release_button(button=self.input_mapping[button_name])
         self.virtualgamepad.update()
         
     @commands.command()
