@@ -3,40 +3,15 @@ import os
 import time
 from twitchio.ext import commands
 import vgamepad as vg
-
-from fetchtoken import fetch_oath_access_token
-
-xbox360_button_mapping = {
-    'A': vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
-    'B': vg.XUSB_BUTTON.XUSB_GAMEPAD_B,
-    'X': vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
-    'Y': vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
-    'UP': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
-    'DOWN': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
-    'LEFT': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
-    'RIGHT': vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
-    'START': vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
-    'BACK': vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
-    'L3': vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_THUMB,
-    'R3': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_THUMB,
-    'LB': vg.XUSB_BUTTON.XUSB_GAMEPAD_LEFT_SHOULDER,
-    'RB': vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
-    'LT': 255,
-    'RT': 255,
-    #'HOME': vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
-
-}
+from inputmap import InputMap
 
 class Bot(commands.Bot):
-    def __init__(self, gamepad, input_map):
-        # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
+    def __init__(self, gamepad, inputmap):
         super().__init__(token=os.getenv('ACCESS_TOKEN'), prefix=os.getenv('PREFIX'), initial_channels=[os.getenv('CHANNEL')])
         self.virtualgamepad = gamepad
-        self.input_mapping = input_map
+        self.inputmap = inputmap
 
     async def event_ready(self):
-        # Notify us when everything is ready!
-        # We are logged in and ready to chat and use commands...
         print(f'Logged in as | {self.nick}')
         print(f'User id is | {self.user_id}')
 
@@ -45,24 +20,55 @@ class Bot(commands.Bot):
         if message.echo:
             return
 
-        if message.content.upper() in self.input_mapping.keys() :
+        if message.content.upper().trim() in self.inputmap.valid_inputs:
             print(f'{message.author.display_name}: {message.content}')
-            button_name = message.content.upper()
-            if button_name == 'LT' or button_name == 'RT':
-                self.input_trigger(button_name)
-            else:
-                self.input_button(button_name)
+
+            if message.content.upper() in self.inputmap.right_analog_map.keys() or message.content.upper() in self.inputmap.left_analog_map.keys():
+                self.input_analog(message.content.upper())
+            elif message.content.uppper() in self.inputmap.trigger_map.keys() : 
+                self.input_trigger(message.content.upper())
+            elif message.content.upper() in self.inputmap.button_map.keys() :
+                self.input_button(message.content.upper())
 
         await self.handle_commands(message)
 
-    def input_trigger(self, button_name) -> None:
-        if button_name == 'RT':
+    #input handling should be split into another class that combines concerns with controller type and inputing to the virtual controller
+    #this will allow the bot to only worry about if a command is valid for the controller
+    def input_analog(self, analog_command) -> None:
+        stick = analog_command[1]
+        direction = analog_command[-1]
+        x_axis = 0
+        y_axes = 0
+        match direction:
+            case 1:
+                x_axis = -32768
+                y_axes = -32768
+            case 2:
+                x_axis = 0
+                y_axes = -32768
+            case 3:
+                x_axis = 32768
+                y_axes = -32768
+            case 4:
+                x_axis = -32768
+                y_axes = 0
+            case 5: 
+                x_axis = 0
+                y_axes = 0
+            case 6: 
+                
+            case _:
+                x_axis = 0
+                y_axes = 0 
+
+    def input_trigger(self, trigger_name) -> None:
+        if trigger_name == 'RT':
             self.virtualgamepad.right_trigger(value=255)     
         else:
             self.virtualgamepad.left_trigger(value=255)
         self.virtualgamepad.update()
         time.sleep(0.5)
-        if button_name == 'RT':
+        if trigger_name == 'RT':
             self.virtualgamepad.right_trigger(0)
         else:
             self.virtualgamepad.left_trigger(0)
@@ -80,5 +86,6 @@ class Bot(commands.Bot):
         await ctx.send(f'Hello {ctx.author.name}!')
 
 load_dotenv()
-bot = Bot(vg.VX360Gamepad(), xbox360_button_mapping)
+input_map = InputMap(True)
+bot = Bot(vg.VX360Gamepad(), input_map)
 bot.run()
