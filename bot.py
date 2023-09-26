@@ -56,7 +56,17 @@ class Bot(commands.Bot):
                 x_axis = 0
                 y_axes = 0
             case 6: 
-                
+                x_axis = 32768
+                y_axes = 0
+            case 7:     
+                x_axis = -32768
+                y_axes = 32768
+            case 8:
+                x_axis = 0
+                y_axes = 32768
+            case 9:
+                x_axis = 32768
+                y_axes = 32768
             case _:
                 x_axis = 0
                 y_axes = 0 
