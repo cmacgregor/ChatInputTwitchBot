@@ -1,5 +1,5 @@
 from twitchio.ext import commands
-
+from enum import Enum
 class CommnadSelectionMode(Enum):
     Queue = 1
     Bucket = 2 
