@@ -39,6 +39,7 @@ class DarksoulsVirtualController(VirtualController):
         'FIRST LEFT HAND',
         'FIRST RIGHT HAND',  
     },
+    
     movement = {
         'MOVE FORWARD',
         'MOVE BACK',
@@ -59,6 +60,7 @@ class DarksoulsVirtualController(VirtualController):
         'JUMP',
         'JUMP ROLL'
     }
+    
     camera = {
         'TARGET ENEMY',
         'CAMERA CENTER',
