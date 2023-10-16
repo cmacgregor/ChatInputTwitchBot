@@ -1,7 +1,7 @@
 import vgamepad as vg
 import time
 
-class VirtualController():
+class TextToInputController():
     button_hold_time = 0.1
     trigger_hold_time = 0.1
     analog_hold_time = 0.5
@@ -65,15 +65,35 @@ class VirtualController():
         
         self.valid_inputs = list(self.buttons.keys()) + list(self.triggers.keys()) + list(self.left_analog.keys()) + list(self.right_analog.keys())
 
-    def handle_input(self, input_name:str) -> None:
-        if input_name in self.right_analog.keys() or input_name in self.left_analog.keys():
-            self.input_analog(input_name)
-        elif input_name in self.triggers.keys() : 
-            self.input_trigger(input_name)
-        elif input_name in self.buttons.keys() :
-            self.input_button(input_name)
+    def text_to_input(self, text:str) -> None:
+        inputs = text.upper().split(", ")
+        #process inputs but throw them all out if we encounter something we don't recognize
+        for input in inputs:
+            if input in self.valid_inputs:
+                #set the controller state
+                self.handle_input(input)
+            else:
+                self.virtual_gamepad.reset()
+                self.virtual_gamepad.update()
+                break
+            
+            
+        #hold controller input for game to register inputs
+        time.sleep(self.button_hold_time)
 
-    def input_analog(self, analog_command) -> None:
+        #reset controller for next input
+        self.virtual_gamepad.reset()
+        self.virtual_gamepad.update()
+            
+    def handle_input(self, input):
+        if input in self.right_analog.keys() or input in self.left_analog.keys():
+            self.set_analog(input)
+        elif input in self.triggers.keys() : 
+            self.set_trigger(input)
+        elif input in self.buttons.keys() :
+            self.set_button(input)
+
+    def set_analog(self, analog_command) -> None:
         split_command = analog_command.split()
         stick = split_command[1]
         direction = int(split_command[-1])
@@ -113,31 +133,18 @@ class VirtualController():
         if stick == 'R':
             self.virtual_gamepad.right_joystick_float(x_value_float=x_axis, y_value_float=y_axis)
             self.virtual_gamepad.update()
-            time.sleep(self.analog_hold_time)
-            self.virtual_gamepad.right_joystick_float(x_value_float=0, y_value_float=0)
-            self.virtual_gamepad.update()
         elif stick == 'L':
             self.virtual_gamepad.left_joystick_float(x_value_float=x_axis, y_value_float=y_axis)
             self.virtual_gamepad.update()
-            time.sleep(self.analog_hold_time)
-            self.virtual_gamepad.left_joystick_float(x_value_float=0, y_value_float=0)
-            self.virtual_gamepad.update()
 
-    def input_trigger(self, trigger_name) -> None:
+    def set_trigger(self, trigger_name) -> None:
         if trigger_name == 'RT':
             self.virtual_gamepad.right_trigger(self.triggers[trigger_name])    
-            time.sleep(self.trigger_hold_time) 
-            self.virtual_gamepad.right_trigger(0)
             self.virtual_gamepad.update()
         else:
             self.virtual_gamepad.left_trigger(self.triggers[trigger_name])
             self.virtual_gamepad.update()
-            self.virtual_gamepad.left_trigger(0)
-            self.virtual_gamepad.update()
 
-    def input_button(self, button_name) -> None:
+    def set_button(self, button_name) -> None:
         self.virtual_gamepad.press_button(button=self.buttons[button_name])
-        self.virtual_gamepad.update()
-        time.sleep(self.button_hold_time)
-        self.virtual_gamepad.release_button(button=self.buttons[button_name])
         self.virtual_gamepad.update()

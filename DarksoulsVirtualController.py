@@ -1,8 +1,8 @@
 
-from virtualcontroller import VirtualController
+from texttoinputcontroller import TextToInputController
 
 
-class DarksoulsVirtualController(VirtualController):
+class DarksoulsVirtualController(TextToInputController):
     def __init__(self, virtualGamepad):
         super().__init__(self, virtualGamepad)
 
@@ -75,4 +75,4 @@ class DarksoulsVirtualController(VirtualController):
         'CAMERA DOWN RIGHT',
     }
 
-    VirtualController.valid_inputs = actions + movement + camera
+    TextToInputController.valid_inputs = actions + movement + camera

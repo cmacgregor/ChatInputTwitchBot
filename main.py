@@ -1,17 +1,13 @@
 from dotenv import load_dotenv
-import os
-from virtualcontroller import VirtualController
+from texttoinputcontroller import TextToInputController
 import vgamepad as vg
 from bot import Bot
 
 
 def main():
     load_dotenv()
-    virtual_controller = VirtualController(vg.VX360Gamepad())
-    token = os.getenv('ACCESS_TOKEN')
-    prefix = os.getenv('PREFIX')
-    initial_channels = [os.getenv('CHANNEL')]
-    bot = Bot(token, prefix, initial_channels, virtual_controller)
+    virtual_controller = TextToInputController(vg.VX360Gamepad())
+    bot = Bot(virtual_controller)
     bot.run()
     
 
