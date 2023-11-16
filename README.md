@@ -14,8 +14,6 @@ twitch documentation on Client credentials grant flow:
 https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow
 
 TODO:
-- Rework Queue input handling to take in a list of commands to set controller state
 - Implement Bucket input handling
-- Move command selection type to virtual controller class from bot
-- Test commands to configure bot
+- Implement tests for texttoinputconverter
 - Ensure configuration commands require elevated privileges
