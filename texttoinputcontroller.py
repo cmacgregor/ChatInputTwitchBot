@@ -1,5 +1,6 @@
 import time
 import vgamepad as vg
+from virtualcontrollerinputs import VirtualControllerInputs
 from xbox360controllerinputs import Xbox360ControllerInputs
 from commandselectionmodes import CommnadSelectionModes
     
@@ -14,7 +15,7 @@ class TextToInputController():
 
         #xbox360 is 0 ds4 is 2 
         if self.virtual_gamepad.get_type() == 0: 
-            self.controller_inputs = Xbox360ControllerInputs()
+            self.set_input_mapping(Xbox360ControllerInputs())
     
     def text_to_input(self, text:str) -> None:
         inputs = text.upper().split(", ")
@@ -98,3 +99,5 @@ class TextToInputController():
         self.virtual_gamepad.press_button(button=self.controller_inputs.buttons[button_name])
         self.virtual_gamepad.update()
    
+    def set_input_mapping(self, input_mapping:VirtualControllerInputs):
+        self.controller_inputs = input_mapping

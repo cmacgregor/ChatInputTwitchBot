@@ -1,6 +1,6 @@
 from virtualcontrollerinputs import VirtualControllerInputs
 
-# TODO - map actions to controller inputs
+# TODO - map actions to controller inputs using lists
 class darksoulscontrollerinputs(VirtualControllerInputs):
     def __init__(self) -> None:
         self.inputs = self.actions + self.movement + self.camera
